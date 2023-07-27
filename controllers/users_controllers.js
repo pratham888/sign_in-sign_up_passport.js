@@ -2,14 +2,25 @@ const User =require('../models/user');
 
 
 
-module.exports.profile = function(req , res){
-    // res.end ('<h1> User Profile</h1>');
+module.exports.profile = async function(req , res){
+    if(req.cookies.user_id){
+       const user= await User.findById(req.cookies.user_id)
+            if(user){
+                return res.render('user_profile',{
+                    title:"User Profile",
+                    user:user
+                })
+            }
 
-    return res.render('user_profile', {
-        title:"User"
-    });
+            return res.redirect('/users/sign-in')
+        
+    }else{
+        return res.redirect('/users/sign-in');
+    }
 }
+   
 
+   
 // render the sign up page
 module.exports.signUp = function(req , res){
     return res.render('user_sign_up' ,{
