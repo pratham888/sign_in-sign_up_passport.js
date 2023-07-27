@@ -3,26 +3,24 @@ const User =require('../models/user');
 
 
 module.exports.profile = async function(req , res){
-    if(req.cookies.user_id){
-       const user= await User.findById(req.cookies.user_id)
-            if(user){
+
                 return res.render('user_profile',{
                     title:"User Profile",
-                    user:user
+                 
                 })
-            }
-
-            return res.redirect('/users/sign-in')
-        
-    }else{
-        return res.redirect('/users/sign-in');
-    }
+   
 }
    
 
    
 // render the sign up page
 module.exports.signUp = function(req , res){
+    if (req.isAuthenticated()){
+       return res.redirect('/users/profile');
+
+    }
+
+
     return res.render('user_sign_up' ,{
         title: "codeial | Sign Up"
     })
@@ -30,6 +28,13 @@ module.exports.signUp = function(req , res){
 
 //render the sign in page
 module.exports.signIn = function(req , res){
+
+     if (req.isAuthenticated()){
+       return res.redirect('/users/profile');
+
+    }
+
+
     return res.render('user_sign_in' ,{
         title: "codeial | Sign In"
     })
@@ -62,32 +67,15 @@ module.exports.create = async function(req, res){
          }
     }
 
-// sign in and crete a session for the user
 
+// sign in and create asession for the user
 module.exports.createSession = async function(req,res){
-   //steps to authincate
-   //find the user
-  const user = await User.findOne({email:req.body.email} )
+    return res.redirect('/');
+}
 
-    //handle user found
-    if(user){
-        // handle password which doesn't match
-        if(user.password != req.body.password){
-            return res.redirect('back');
-
-        }
-        // handle session creation
-        res.cookie('user_id' , user.id);
-        return res.redirect('/users/profile');
-
-    }else{
-
-        //handle user not found
-
-        return res.redirect('back');
-
-        
-    }
-
-  
+module.exports.destroySession = function(req , res , next){
+    req.logout(function(err) {
+        if (err) { return next(err); }
+        res.redirect('/');
+      });
 }
